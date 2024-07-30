@@ -1,13 +1,12 @@
 package com.assignmentFirst.AdsCampaignAPI.controller;
-
 import com.assignmentFirst.AdsCampaignAPI.model.*;
 import com.assignmentFirst.AdsCampaignAPI.service.AdService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.net.http.HttpResponse;
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -49,88 +48,96 @@ public class AdsCampaignController {
 
     // Add Organization - (only organization deatils - OrgId, name, country, status)
     @PostMapping("/organization")
-    public String addOrganization(@RequestBody Organization organization) {
+    public ResponseEntity<String> addOrganization(@RequestBody Organization organization) {
         if (adService.addOrganization(organization)) {
-            return "organization added successfully";
+            return new ResponseEntity<>("organization added successfully", HttpStatus.CREATED);
         }
-        return "organization already exists";
+        return new ResponseEntity<>("organization already exists", HttpStatus.CONFLICT);
     }
 
     // Add Account - (Provide OrgID and account related features)
     @PostMapping("/organization/{orgId}/account")
-    public String addAccount(@PathVariable Long orgId, @RequestBody Account account) {
+    public ResponseEntity<String> addAccount(@PathVariable Long orgId, @RequestBody Account account) {
         account.setOrgId(orgId);
-        int isAdded = adService.addaccount(account);
-        if (isAdded == 0) {
-            return "account added successfully";
-        } else if(isAdded == 1) {
-            return "account already exists";
+        HashMap<String, Boolean> isAdded = adService.addaccount(account);
+        Boolean accountExists = isAdded.get("acExist");
+        Boolean organizationExists = isAdded.get("orgExist");
+
+        if (!accountExists && organizationExists) {
+            return new ResponseEntity<>("Account added successfully", HttpStatus.CREATED);
+        } else if (accountExists && organizationExists) {
+            return new ResponseEntity<>("Account already exists", HttpStatus.CONFLICT);
         }
-        return "Invalid organization reference";
+        return new ResponseEntity<>("Invalid organization reference", HttpStatus.BAD_REQUEST);
     }
 
     // Add Campaign - (provide organizationId, accountId and other related features)
     @PostMapping("orgs/{orgId}/account/{accId}/campaign")
-    public String addCampaign(@PathVariable Long orgId, @PathVariable Long accId, @RequestBody Campaign campaign) {
+    public ResponseEntity<String> addCampaign(@PathVariable Long orgId, @PathVariable Long accId, @RequestBody Campaign campaign) {
         campaign.setAccId(orgId);
         campaign.setAccId(accId);
-        int isAdded = adService.addcampaign(campaign);
-        if (isAdded == 0 ) {
-            return "campaign added successfully";
-        } else if (isAdded == 1 ) {
-            return "campaign already exists";
+        HashMap<String, Boolean> isAdded = adService.addcampaign(campaign);
+
+        Boolean orgexist = isAdded.get("org");
+        Boolean accexist = isAdded.get("acc");
+        Boolean campexist = isAdded.get("camp");
+
+        if (orgexist && accexist && !campexist) {
+            return new ResponseEntity<>("campaign added successfully", HttpStatus.OK);
+        } else if (orgexist && accexist && campexist) {
+            return new ResponseEntity<>("campaign already exists", HttpStatus.CONFLICT);
+        } else if (orgexist && !accexist) {
+            return new ResponseEntity<>("invalid account Id reference", HttpStatus.BAD_REQUEST);
         }
-        else if(isAdded == 2 ) {
-            return "invalid account Id reference";
-        }
-        return "invalid organization Id reference";
+        return new ResponseEntity<>("invalid organization Id reference", HttpStatus.BAD_REQUEST);
     }
 
     // Update Organization Status
     @PutMapping("/organization/{orgId}/status")
-    public String updateOrganizationStatus(@PathVariable int orgId, @RequestParam String status) {
+    public ResponseEntity<String> updateOrganizationStatus(@PathVariable int orgId, @RequestParam String status) {
         boolean isUpdated = adService.updateOrganizationStatus(orgId, status);
         if (isUpdated) {
-            return "organization status updated successfully";
-        } else {
-            return "organization does not exist";
+            return new ResponseEntity<>("organization status updated successfully", HttpStatus.OK);
         }
+        return new ResponseEntity<>("invalid organization Id reference", HttpStatus.BAD_REQUEST);
     }
 
-    /*
     // Update Account Status
     @PutMapping("org/{orgId}/account/{accountId}/status")
     public ResponseEntity<String> updateAccountStatus(@PathVariable int orgId, @PathVariable long accountId, @RequestParam String status) {
-        int isUpdated = adService.updateAccountStatus(orgId, accountId, status);
-        if (isUpdated == 0) {
+        HashMap<String, Boolean> isUpdated = adService.updateAccountStatus(orgId, accountId, status);
+        if (isUpdated.get("orgExist") && isUpdated.get("acExist")) {
             return new ResponseEntity<>("account status updated successfully", HttpStatus.OK);
+        } else if (isUpdated.get("orgExist") && !isUpdated.get("acExist")) {
+            return new ResponseEntity<>("invalid account id", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>("invalid id", HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>("invalid organization id", HttpStatus.BAD_REQUEST);
     }
-
-     */
-
-
-    // Update Account Status
-    @PutMapping("org/{orgId}/account/{accountId}/status")
-    public String  updateAccountStatus(@PathVariable int orgId, @PathVariable long accountId, @RequestParam String status) {
-        int isUpdated = adService.updateAccountStatus(orgId, accountId, status);
-        if (isUpdated == 0) {
-            return "account status updated successfully";
-        }
-        return "invalid reference arguments";
-    }
-
-
 
     // Update Campaign Name and Status
-    @PutMapping("/campaign/{campaignId}")
-    public String updateCampaign(@PathVariable long campaignId, @RequestParam String name, @RequestParam String status) {
-        boolean isUpdated = adService.updateCampaign(campaignId, name, status);
-        if (isUpdated) {
-            return "campaign updated successfully";
-        } else {
-            return "campaign does not exist";
+    @PutMapping("/orgs/{orgId}/account/{accountId}/campaign/{campaignId}")
+    public ResponseEntity<String> updateCampaign(@PathVariable int orgId, @PathVariable long accountId, @PathVariable long campaignId, @RequestParam String name, @RequestParam String status) {
+        HashMap<String, Boolean> isUpdated = adService.updateCampaign(orgId, accountId, campaignId, name, status);
+
+        Boolean orgexist = isUpdated.get("org");
+        Boolean accexist = isUpdated.get("acc");
+        Boolean campexist = isUpdated.get("camp");
+
+        if (orgexist && accexist && campexist) {
+            return new ResponseEntity<>("campaign updated successfully", HttpStatus.OK);
+        } else if (orgexist && accexist && !campexist) {
+            return new ResponseEntity<>("campaign doesn't exist", HttpStatus.BAD_REQUEST);
+        } else if (orgexist && !accexist) {
+            return new ResponseEntity<>("invalid account Id reference", HttpStatus.BAD_REQUEST);
         }
+        return new ResponseEntity<>("invalid organization Id reference", HttpStatus.BAD_REQUEST);
     }
+
 }
+
+
+
+
+
+
+

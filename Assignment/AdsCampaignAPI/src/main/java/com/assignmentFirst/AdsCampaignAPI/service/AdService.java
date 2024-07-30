@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,59 +51,73 @@ public class AdService {
     }
 
 
-
     // Method to add account
-    public int addaccount(Account account) {
+    public HashMap<String, Boolean> addaccount(Account account) {
         List<Organization> organizations = repository.getAllOrganizations();
         boolean orgExists = organizations.stream().anyMatch(org -> org.getOrgId() == account.getOrgId());
 
+        HashMap<String, Boolean> hm = new HashMap<>();
+        hm.put("orgExist", false);
+        hm.put("acExist", false);
         if (orgExists) {
+            hm.put("orgExist", true);
             // checks if the account already exists in the provided organization reference
             List<Account> accounts = getAllAccountsByOrgId(account.getOrgId());
             boolean accountExists = accounts.stream().anyMatch(acc -> acc.getAccId() == account.getAccId());
+
             if (!accountExists) {
                 repository.addAccount(account);
-                return 0;
+                return hm;
             } else {
                 // Account already exists
-                return 1;
+                hm.put("acExist", true);
+                return hm;
             }
         }
         // Invalid organization reference
-        return 2;
+        return hm;
     }
 
 
-    public int addcampaign(Campaign camp) {
+    // method to add campaign
+    public HashMap<String, Boolean> addcampaign(Campaign camp) {
         List<Organization> organizations = repository.getAllOrganizations();
         boolean orgExists = organizations.stream().anyMatch(org -> org.getOrgId() == camp.getOrgId());
 
+        HashMap<String, Boolean> exist = new HashMap<>();
+        exist.put("org", false);
+        exist.put("acc", false);
+        exist.put("camp", false);
 
         if (orgExists) {
+            exist.put("org", true);
             // checks if the account already exists in the provided organization reference
             List<Account> accounts = getAllAccountsByOrgId(camp.getOrgId());
             boolean accountExists = accounts.stream().anyMatch(acc -> acc.getAccId() == camp.getAccId());
             if (accountExists) {
+                exist.put("acc", true);
                 List<Campaign> camps = getAllCampaignsByAccountId(camp.getAccId());
                 boolean campExists = camps.stream().anyMatch(campp -> campp.getAccId() == camp.getCampaignId());
 
                 if (!campExists) {
                     // add if campaign doesn't already exists
                     repository.addCampaign(camp);
-                    return 0;
+                    return exist;
                 } else {
                     // campaign already exists
-                    return 1;
+                    exist.put("camp", true);
+                    return exist;
                 }
             } else {
                 // invalid account reference
-                return 2;
+                return exist;
             }
         }
         // invalid organization reference
-        return 3;
+        return exist;
     }
 
+    //method for updating organization status value
     public boolean updateOrganizationStatus(int orgId, String newStatus) {
         List<Organization> organizations = repository.getAllOrganizations();
         boolean exists = organizations.stream().anyMatch(org -> org.getOrgId() == orgId);
@@ -115,35 +130,65 @@ public class AdService {
         }
     }
 
-    public int updateAccountStatus(int orgId, long accountId, String newStatus) {
+    // Method to update account status
+    public HashMap<String, Boolean> updateAccountStatus(int orgId, long accountId, String newStatus) {
         List<Organization> organizations = repository.getAllOrganizations();
         boolean orgExists = organizations.stream().anyMatch(org -> org.getOrgId() == orgId);
+        HashMap<String, Boolean> hm = new HashMap<>();
+        hm.put("orgExist", false);
+        hm.put("acExist", false);
 
         if (orgExists) {
+            hm.put("orgExist", true);
             // checks if the account already exists in the provided organization reference
             List<Account> accounts = getAllAccountsByOrgId((long) orgId);
             boolean accountExists = accounts.stream().anyMatch(acc -> acc.getAccId() == accountId);
             if (accountExists) {
+                hm.put("acExist", true);
                 repository.updateAccountStatus(accountId, newStatus);
-                return 0;
+                return hm;
             }
         }
         // Invalid organization reference
-        return 1;
+        return hm;
     }
 
 
-    // Update campain name and status
-    public boolean updateCampaign(long campaignId, String newName, String newStatus) {
-        List<Campaign> campaigns = repository.getAllCampaigns();
-        boolean exists = campaigns.stream().anyMatch(c -> c.getCampaignId() == campaignId);
+    public HashMap<String, Boolean> updateCampaign(int orgId, long accountId, long campaignId, String newName, String newStatus) {
+        List<Organization> organizations = repository.getAllOrganizations();
+        boolean orgExists = organizations.stream().anyMatch(org -> org.getOrgId() == orgId);
 
-        if (exists) {
-            repository.updateCampaign(campaignId, newName, newStatus);
-            return true;
-        } else {
-            return false;
+        HashMap<String, Boolean> exist = new HashMap<>();
+        exist.put("org", false);
+        exist.put("acc", false);
+        exist.put("camp", false);
+
+        if (orgExists) {
+            exist.put("org", true);
+            // checks if the account already exists in the provided organization reference
+            List<Account> accounts = getAllAccountsByOrgId((long) orgId);
+            boolean accountExists = accounts.stream().anyMatch(acc -> acc.getAccId() == accountId);
+            if (accountExists) {
+                exist.put("acc", true);
+                List<Campaign> camps = getAllCampaignsByAccountId(accountId);
+                boolean campExists = camps.stream().anyMatch(campp -> campp.getCampaignId() == campaignId);
+
+                if (campExists) {
+                    // Update the campaign if it exists
+                    exist.put("camp", true);
+                    repository.updateCampaign(campaignId, newName, newStatus);
+                    return exist;
+                } else {
+                    // Campaign does not exist
+                    return exist;
+                }
+            } else {
+                // Invalid account reference
+                return exist;
+            }
         }
+        // Invalid organization reference
+        return exist;
     }
 
     public List<CampaignSummary> getSortedCampaignMetrics(String sortBy, String order) {

@@ -23,20 +23,15 @@ public class CSVUtil {
     // Headers for different entities in the CSV
     public static final String FILE_PATH = "src/main/resources/dataset.csv";
     private static final Logger logger = LoggerFactory.getLogger(CSVUtil.class);
-    private static final String[] ORGANIZATION_HEADERS = {"orgId", "orgName", "orgCountry", "orgStatus"};
-    private static final String[] ACCOUNT_HEADERS = {"orgId", "accountId", "accountName", "accountStatus"};
-    private static final String[] CAMPAIGN_HEADERS = {"accountId", "campaignId", "campaignName", "campaignStatus", "budget"};
-    private static final String[] CAMPAIGN_METRICS_HEADERS = {"campaignId", "campaignName", "reportDate", "spend", "revenue", "impressions", "clicks"};
     private static final String[] HEADERS = {
             "orgId", "orgName", "orgCountry", "orgStatus",
             "accountId", "accountName", "accountStatus",
             "campaignId", "campaignName", "campaignStatus", "budget",
             "reportDate", "spend", "revenue", "impressions", "clicks"
     };
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     // Read organizations from CSV
-    public static List<Organization> readOrganizations(String filePath) {
+    public static List<Organization>readOrganizations(String filePath) {
         List<Organization> organizations = new ArrayList<>();
         try (CSVReader reader = new CSVReader(new FileReader(filePath))) {
             HeaderColumnNameMappingStrategy<Organization> strategy = new HeaderColumnNameMappingStrategy<>();
@@ -55,7 +50,6 @@ public class CSVUtil {
 
         return organizations;
     }
-
 
     // Read accounts from CSV
     public static List<Account> readAccounts(String filePath) {

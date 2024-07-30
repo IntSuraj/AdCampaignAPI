@@ -1,6 +1,5 @@
 package com.assignmentFirst.AdsCampaignAPI.model;
 
-
 public class CampaignSummary {
     private Long campaignId;
     private String campaignName;
