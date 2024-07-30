@@ -258,41 +258,44 @@ public class CSVUtil {
         List<Account> accounts = readAccounts(FILE_PATH);
         List<Campaign> campaigns = readCampaigns(FILE_PATH);
 
-        // Check if the campaign already exists
+        // Check if the campaign already exists within the same organization and account
         boolean exists = campaigns.stream()
-                .anyMatch(c -> c.getCampaignId() == camp.getCampaignId());
+                .anyMatch(c -> c.getCampaignId() == camp.getCampaignId() && c.getOrgId() == camp.getOrgId() && c.getAccId() == camp.getAccId());
 
-        Account acc = accounts.stream()
-                .filter(a -> a.getAccId() == camp.getAccId())
-                .findFirst()
-                .orElse(null);
+        if (!exists) {
+            Account acc = accounts.stream()
+                    .filter(a -> a.getAccId() == camp.getAccId())
+                    .findFirst()
+                    .orElse(null);
 
-        Organization org = (acc != null) ? organizations.stream()
-                .filter(o -> o.getOrgId() == camp.getOrgId())
-                .findFirst()
-                .orElse(null) : null;
+            Organization org = (acc != null) ? organizations.stream()
+                    .filter(o -> o.getOrgId() == camp.getOrgId())
+                    .findFirst()
+                    .orElse(null) : null;
 
-        if (org != null && acc != null) {
-            try (CSVWriter writer = new CSVWriter(new FileWriter(FILE_PATH, true))) {
-                writer.writeNext(new String[]{
-                        String.valueOf(org.getOrgId()),
-                        org.getOrgName(),
-                        org.getOrgCountry(),
-                        org.getOrgStatus(),
-                        String.valueOf(acc.getAccId()),
-                        acc.getName(),
-                        acc.getStatus(),
-                        String.valueOf(camp.getCampaignId()),
-                        camp.getName(),
-                        camp.getStatus(),
-                        String.valueOf(camp.getBudget()),
-                        "", "", "", "", ""
-                });
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (org != null && acc != null) {
+                try (CSVWriter writer = new CSVWriter(new FileWriter(FILE_PATH, true))) {
+                    writer.writeNext(new String[]{
+                            String.valueOf(org.getOrgId()),
+                            org.getOrgName(),
+                            org.getOrgCountry(),
+                            org.getOrgStatus(),
+                            String.valueOf(acc.getAccId()),
+                            acc.getName(),
+                            acc.getStatus(),
+                            String.valueOf(camp.getCampaignId()),
+                            camp.getName(),
+                            camp.getStatus(),
+                            String.valueOf(camp.getBudget()),
+                            "", "", "", "", ""
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
+
 
 
     // Update organization status in CSV

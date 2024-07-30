@@ -40,10 +40,6 @@ public class CSVRepository {
         CSVUtil.addCampaignWriting(campaign);
     }
 
-    public void saveData(List<Organization> organizations, List<Account> Accounts, List<Campaign> campaigns, List<campaignMetrics> metrics) {
-        CSVUtil.addOrganizationwriting((Organization) organizations);
-    }
-
     public List<CampaignSummary> aggregateMetricsSummary() {
         List<campaignMetrics> metricsList = CSVUtil.readCampaignMetrics(CSVUtil.FILE_PATH);
         return CSVUtil.aggregateMetrics(metricsList);

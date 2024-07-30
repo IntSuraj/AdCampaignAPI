@@ -74,9 +74,9 @@ public class AdsCampaignController {
     // Add Campaign - (provide organizationId, accountId and other related features)
     @PostMapping("orgs/{orgId}/account/{accId}/campaign")
     public ResponseEntity<String> addCampaign(@PathVariable Long orgId, @PathVariable Long accId, @RequestBody Campaign campaign) {
-        campaign.setAccId(orgId);
+        campaign.setOrgId(orgId);
         campaign.setAccId(accId);
-        HashMap<String, Boolean> isAdded = adService.addcampaign(campaign);
+        HashMap<String, Boolean> isAdded = adService.addcampaign(orgId, accId, campaign);
 
         Boolean orgexist = isAdded.get("org");
         Boolean accexist = isAdded.get("acc");
@@ -91,6 +91,7 @@ public class AdsCampaignController {
         }
         return new ResponseEntity<>("invalid organization Id reference", HttpStatus.BAD_REQUEST);
     }
+
 
     // Update Organization Status
     @PutMapping("/organization/{orgId}/status")

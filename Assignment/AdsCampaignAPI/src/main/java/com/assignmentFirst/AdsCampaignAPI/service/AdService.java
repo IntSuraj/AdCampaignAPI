@@ -78,11 +78,10 @@ public class AdService {
         return hm;
     }
 
-
     // method to add campaign
-    public HashMap<String, Boolean> addcampaign(Campaign camp) {
+    public HashMap<String, Boolean> addcampaign(long orgId, long accId, Campaign camp) {
         List<Organization> organizations = repository.getAllOrganizations();
-        boolean orgExists = organizations.stream().anyMatch(org -> org.getOrgId() == camp.getOrgId());
+        boolean orgExists = organizations.stream().anyMatch(org -> org.getOrgId() == orgId);
 
         HashMap<String, Boolean> exist = new HashMap<>();
         exist.put("org", false);
@@ -92,30 +91,25 @@ public class AdService {
         if (orgExists) {
             exist.put("org", true);
             // checks if the account already exists in the provided organization reference
-            List<Account> accounts = getAllAccountsByOrgId(camp.getOrgId());
-            boolean accountExists = accounts.stream().anyMatch(acc -> acc.getAccId() == camp.getAccId());
+            List<Account> accounts = getAllAccountsByOrgId(orgId);
+            boolean accountExists = accounts.stream().anyMatch(acc -> acc.getAccId() == accId);
             if (accountExists) {
                 exist.put("acc", true);
-                List<Campaign> camps = getAllCampaignsByAccountId(camp.getAccId());
-                boolean campExists = camps.stream().anyMatch(campp -> campp.getAccId() == camp.getCampaignId());
+                List<Campaign> camps = getAllCampaignsByAccountId(accId);
+                boolean campExists = camps.stream().anyMatch(campp -> campp.getCampaignId() == camp.getCampaignId());
 
-                if (!campExists) {
-                    // add if campaign doesn't already exists
-                    repository.addCampaign(camp);
-                    return exist;
-                } else {
+                if (campExists) {
                     // campaign already exists
                     exist.put("camp", true);
-                    return exist;
+                } else {
+                    // add campaign if it doesn't already exist
+                    repository.addCampaign(camp);
                 }
-            } else {
-                // invalid account reference
-                return exist;
             }
         }
-        // invalid organization reference
         return exist;
     }
+
 
     //method for updating organization status value
     public boolean updateOrganizationStatus(int orgId, String newStatus) {
