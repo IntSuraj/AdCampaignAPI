@@ -147,7 +147,7 @@ class AdServiceTest {
         when(adService.getAllAccountsByOrgId(1L)).thenReturn(accounts);
         when(adService.getAllCampaignsByAccountId(1L)).thenReturn(campaigns);
 
-        HashMap<String, Boolean> result = adService.addcampaign(new Campaign(1, 1, 1, "Camp1", "Active", 100));
+        HashMap<String, Boolean> result = adService.addcampaign(1, 1, new Campaign(1, 1, 1, "Camp1", "Active", 100));
         assertEquals(true, result.get("org"));
         assertEquals(true, result.get("acc"));
         assertEquals(false, result.get("camp"));
@@ -165,7 +165,7 @@ class AdServiceTest {
         when(adService.getAllAccountsByOrgId(1L)).thenReturn(accounts);
         when(adService.getAllCampaignsByAccountId(1L)).thenReturn(campaigns);
 
-        HashMap<String, Boolean> result = adService.addcampaign(new Campaign(1, 1, 1, "Camp1", "Active", 100));
+        HashMap<String, Boolean> result = adService.addcampaign(1, 1, new Campaign(1, 1, 1, "Camp1", "Active", 100));
         assertEquals(true, result.get("org"));
         assertEquals(true, result.get("acc"));
         assertEquals(true, result.get("camp"));
@@ -181,7 +181,7 @@ class AdServiceTest {
         when(repository.getAllOrganizations()).thenReturn(organizations);
         when(adService.getAllAccountsByOrgId(1L)).thenReturn(accounts);
 
-        HashMap<String, Boolean> result = adService.addcampaign(new Campaign(1, 1, 1, "Camp1", "Active", 100));
+        HashMap<String, Boolean> result = adService.addcampaign(1, 1, new Campaign(1, 1, 1, "Camp1", "Active", 100));
         assertEquals(true, result.get("org"));
         assertEquals(false, result.get("acc"));
         assertEquals(false, result.get("camp"));
@@ -195,13 +195,14 @@ class AdServiceTest {
 
         when(repository.getAllOrganizations()).thenReturn(organizations);
 
-        HashMap<String, Boolean> result = adService.addcampaign(new Campaign(1, 1, 1, "Camp1", "Active", 100));
+        HashMap<String, Boolean> result = adService.addcampaign(1, 1, new Campaign(1, 1, 1, "Camp1", "Active", 100));
         assertEquals(false, result.get("org"));
         assertEquals(false, result.get("acc"));
         assertEquals(false, result.get("camp"));
 
         verify(repository, never()).addCampaign(any(Campaign.class));
     }
+
 
     @Test
     void testUpdateOrganizationStatus() {

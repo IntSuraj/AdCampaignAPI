@@ -9,5 +9,4 @@ public class AdsCampaignApiApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(AdsCampaignApiApplication.class, args);
 	}
-
 }

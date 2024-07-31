@@ -117,7 +117,7 @@ class AdsCampaignControllerTest {
         isAdded.put("acc", true);
         isAdded.put("camp", false);
 
-        Mockito.when(adService.addcampaign(any(Campaign.class))).thenReturn(isAdded);
+        Mockito.when(adService.addcampaign(anyLong(), anyLong(), any(Campaign.class))).thenReturn(isAdded);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/orgs/1/account/1/campaign")
                         .contentType("application/json")
@@ -133,7 +133,7 @@ class AdsCampaignControllerTest {
         isAdded.put("acc", true);
         isAdded.put("camp", true);
 
-        Mockito.when(adService.addcampaign(any(Campaign.class))).thenReturn(isAdded);
+        Mockito.when(adService.addcampaign(anyLong(), anyLong(), any(Campaign.class))).thenReturn(isAdded);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/orgs/1/account/1/campaign")
                         .contentType("application/json")
@@ -149,7 +149,7 @@ class AdsCampaignControllerTest {
         isAdded.put("acc", false);
         isAdded.put("camp", false);
 
-        Mockito.when(adService.addcampaign(any(Campaign.class))).thenReturn(isAdded);
+        Mockito.when(adService.addcampaign(anyLong(), anyLong(), any(Campaign.class))).thenReturn(isAdded);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/orgs/1/account/1/campaign")
                         .contentType("application/json")
@@ -165,7 +165,7 @@ class AdsCampaignControllerTest {
         isAdded.put("acc", false);
         isAdded.put("camp", false);
 
-        Mockito.when(adService.addcampaign(any(Campaign.class))).thenReturn(isAdded);
+        Mockito.when(adService.addcampaign(anyLong(), anyLong(), any(Campaign.class))).thenReturn(isAdded);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/orgs/1/account/1/campaign")
                         .contentType("application/json")
